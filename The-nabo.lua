@@ -1,4 +1,3 @@
-
 --[[ Script AutoUpdater ]]
  local version = "1"
  local author = "Vankatze"
@@ -9,7 +8,7 @@
  local UPDATE_PATH = "/vankatze/vktz/edit/master/The-nabo.lua".."?rand="..ran(3500,5500)
  local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
  local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
- local cha = myHero.charName
+local cha = myHero.charName
 
 if cha ~= "Ezreal" then return end
 
@@ -591,7 +590,9 @@ function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
 end
 
 function round(num) 
-  if num >= 0 then return math.floor(num+.5) else return math.ceil(num-.5) end
+  local kek = math.floor(num+.5)
+  local kok =  math.ceil(num-.5)
+  if num >= 0 then return kek else return kok end
 end
 
 function DrawCircle2(x, y, z, radius, color)
