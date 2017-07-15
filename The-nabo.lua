@@ -1,12 +1,12 @@
 
 --[[ Script AutoUpdater ]]
- local version = "5"
- local author = "RK1K"
- local SCRIPT_NAME = "RK_Utility"
+ local version = "1"
+ local author = "Vankatze"
+ local SCRIPT_NAME = "The-nabo"
  local AUTOUPDATE = true
  local UPDATE_HOST = "raw.githubusercontent.com"
  local ran = math.random
- local UPDATE_PATH = "/RK1K/RKScriptFolder/master/RK%20Utility.lua".."?rand="..ran(3500,5500)
+ local UPDATE_PATH = "/vankatze/vktz/edit/master/The-nabo.lua".."?rand="..ran(3500,5500)
  local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
  local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
  local cha = myHero.charName
