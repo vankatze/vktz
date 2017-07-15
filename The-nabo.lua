@@ -5,7 +5,7 @@
  local AUTOUPDATE = true
  local UPDATE_HOST = "raw.githubusercontent.com"
  local ran = math.random
- local UPDATE_PATH = "/vankatze/vktz/edit/master/The-nabo.lua".."?rand="..ran(3500,5500)
+ local UPDATE_PATH = "/vankatze/vktz/master/The-nabo.lua".."?rand="..ran(3500,5500)
  local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
  local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 local cha = myHero.charName
@@ -232,9 +232,9 @@ end
                             if tonumber(version) < ServerVersion then
                                 DelayAction(function() print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">New version found for RK Utility... <font color=\"#000000\"> | </font><font color=\"#FF0000\"></font><font color=\"#FF0000\"><b> Version "..ServerVersion.."</b></font>") end, 3)
                                 DelayAction(function() print("<font color=\"#FFFFFF\"><b> >> Updating, please don't press F9 << </b></font>") end, 4)
-                                DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">RK Utility</font> <font color=\"#000000\"> | </font><font color=\"#FF0000\">UPDATED <font color=\"#FF0000\"><b>("..version.." => "..ServerVersion..")</b></font> Press F9 twice to load the updated version.") end) end, 5)
+                                DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The-Nabo</font> <font color=\"#000000\"> | </font><font color=\"#FF0000\">UPDATED <font color=\"#FF0000\"><b>("..version.." => "..ServerVersion..")</b></font> Press F9 twice to load the updated version.") end) end, 5)
                             else
-                                DelayAction(function() print("<b><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">RK Utility</font><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0000\"> Version "..ServerVersion.."</b></font>") end, 1)
+                                DelayAction(function() print("<b><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The-Nabo</font><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0000\"> Version "..ServerVersion.."</b></font>") end, 1)
                                 end
                         end
                     else
