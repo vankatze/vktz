@@ -1,27 +1,42 @@
-local ScriptName = "The-nabo"
+--[[ Script AutoUpdater ]]
+ local version = "2.0"
+ local author = "Vankatze"
+ local SCRIPT_NAME = "The_Nabo"
+ local AUTOUPDATE = true
+ local UPDATE_HOST = "raw.githubusercontent.com"
+ local ran = math.random
+ local UPDATE_PATH = "vankatze/vktz/blob/master/The-nabo.lua".."?rand="..ran(3500,5500)
+ local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+ local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+
+--[[ Local General ]]
+local ScriptName = "The Nabo"
 local AUTOUPDATES = true
-local Author = "VANKARRO"
-local version = 2.0
+local Author = "Vankatze"
+local version = 1
 local mh = myHero
 local cha = mh.charName
-
-if cha ~= "Ezreal" then return end --Revisar si es el champ
-
-local Q, W, E, R, Ignite = nil, nil, nil, nil, nil --Lo que vas a usar lo deja nil para despues asignarle valor
+local pi, pi2, sin, cos, huge, sqrt, floor, ceil, max, random, round = math.pi, 2*math.pi, math.sin, math.cos, math.huge, math.sqrt, math.floor, math.ceil, math.max, math.random, math.round
+local clock = os.clock
+local pairs, ipairs = pairs, ipairs
+local insert, remove = table.insert, table.remove
+local TEAM_ALLY, TEAM_ENEMY
+local Q, W, E, R, Ignite = nil, nil, nil, nil, nil
 local TS, Menu = nil, nil
 local PredictedDamage = {}
 local RefreshTime = 0.4
-
 local DefensiveItems = nil 
 local CastableItems = {
-    Bork        = { Range = 650 , Slot   = function() return FindItemSlot("SwordOfFeastAndFamine") end,  reqTarget = true,  IsReady                     = function() return (FindItemSlot("SwordOfFeastAndFamine") ~= nil and mh:CanUseSpell(FindItemSlot("SwordOfFeastAndFamine")) == READY) end, Damage = function(target) return getDmg("RUINEDKING", target, mh) end},
-    Bwc         = { Range = 650 , Slot   = function() return FindItemSlot("BilgewaterCutlass") end,  reqTarget = true,  IsReady                         = function() return (FindItemSlot("BilgewaterCutlass") ~= nil and mh:CanUseSpell(FindItemSlot("BilgewaterCutlass")) == READY) end, Damage = function(target) return getDmg("BWC", target, mh) end},
-    Hextech     = { Range = 750 , Slot   = function() return FindItemSlot("HextechGunblade") end,  reqTarget = true,    IsReady                         = function() return (FindItemSlot("HextechGunblade") ~= nil and mh:CanUseSpell(FindItemSlot("HextechGunblade")) == READY) end, Damage = function(target) return getDmg("HXG", target, mh) end},
-}
+    Bork        = { Range = 650 , Slot = function() return FindItemSlot("SwordOfFeastAndFamine") end, reqTarget = true, IsReady = function() return (FindItemSlot("SwordOfFeastAndFamine") ~= nil and mh:CanUseSpell(FindItemSlot("SwordOfFeastAndFamine")) == READY) end, Damage = function(target) return getDmg("RUINEDKING", target, mh) end},
+    Bwc         = { Range = 650 , Slot = function() return FindItemSlot("BilgewaterCutlass") end, reqTarget = true, IsReady = function() return (FindItemSlot("BilgewaterCutlass") ~= nil and mh:CanUseSpell(FindItemSlot("BilgewaterCutlass")) == READY) end, Damage = function(target) return getDmg("BWC", target, mh) end},
+    Hextech     = { Range = 750 , Slot = function() return FindItemSlot("HextechGunblade") end, reqTarget = true, IsReady = function() return (FindItemSlot("HextechGunblade") ~= nil and mh:CanUseSpell(FindItemSlot("HextechGunblade")) == READY) end, Damage = function(target) return getDmg("HXG", target, mh) end},
+	}
 
-function OnLoad() -- Sirve para cargar todas las weas
-    BaseUlt()
-    print("<b><font color=\"#FF0077\">EzzY - The true Nabo : </font></b><font color=\"#FFCB0F\"> Funny for you ! </font><font color=\"#FF0077\">| Vankatze |</font>")
+if cha ~= "Ezreal" then return end
+
+--[[ Script Menu ]]
+function OnLoad() BaseUlt()
+    print("<b><font color=\"#FF0077\">EzzY - The truly Nabo : </font></b><font color=\"#FFCB0F\"> Funny for you ! </font><font color=\"#FF0077\">| Vankatze |</font>")
     local r = _Required()
     r:Add({Name = "SimpleLib", Url = "raw.githubusercontent.com/jachicao/BoL/master/SimpleLib.lua"})
     r:Check()
@@ -112,11 +127,13 @@ function OnLoad() -- Sirve para cargar todas las weas
         Menu.BaseUlt:addParam("Verbose", "Track enemy recall in chat", 1, true)
 end
 
+--[[ Script Start ]]
 function OnTick()
     if Menu == nil then return end
     TS:update()
     KillSteal()
     SetSkin(mh, Menu.Misc.SetSkin)
+    RState = mh:CanUseSpell(_R) == READY
     if OrbwalkManager:IsCombo() then
         Combo()
     elseif OrbwalkManager:IsHarass() then
@@ -142,10 +159,10 @@ function OnTick()
     end
 end
 
+--[[ Auto Lantern ]]
 class "ThreshLantern"
 function ThreshLantern:__init()
     self.lantern = nil
-
     AddTickCallback(function() self:OnTick() end)
     AddCreateObjCallback(function(a) self:OnCreateObj(a) end)
     AddDeleteObjCallback(function(a) self:OnDeleteObj(a) end)
@@ -171,7 +188,7 @@ function Collides(vec)
     return IsWall(D3DXVECTOR3(vec.x, vec.y, vec.z))
 end
 
-
+--[[ Script Code ]]
 function KillSteal()
     for idx, enemy in ipairs(GetEnemyHeroes()) do
         local ok = enemy.health/enemy.maxHealth <= 0.3
@@ -186,7 +203,6 @@ function KillSteal()
         end
     end
 end
-
 
 function Combo()
     local target = TS.target
@@ -403,31 +419,31 @@ function UseItems(unit)
     end
 end
 
+--[[ Script Base Ult ]]
 class "BaseUlt"
 function BaseUlt:__init()
     self.enemyHeros = GetEnemyHeroes()
-  self.SpellTable = {
-        
-        R = {range = 9999, speed = 2000, delay = 1, width = 150, collision = false}
-    }
-
+    self.print,self.PrintChat = _G.print, _G.PrintChat
+    self.manaPercent = nil
+    self.castTime = 0
+    self.SpellTable = {
+       				  R = {range = 9999, speed = 2000, delay = 1, width = 150, collision = false}
+   					  }
     self.spellDmg = {
-        
-         [_R] = function(unit) if self.RState then return myHero:CalcMagicDamage(unit, ((((myHero:GetSpellData(_R).level * 150) + 200) + (myHero.ap * 0.9)) + myHero.addDamage)) end end
-    }
+         			[_R] = function(unit) return mh:CalcMagicDamage(unit, ((((mh:GetSpellData(_R).level * 150) + 200) + (mh.ap * 0.9)) + mh.addDamage)) end
+    				}
     self.BaseSpots = {
-             D3DXVECTOR3(396,182.132,462),
-             D3DXVECTOR3(14340.418,171.9777,14391.075)
-         }
-
+             		 D3DXVECTOR3(396,182.132,462),
+            		 D3DXVECTOR3(14340.418,171.9777,14391.075)
+        			 }
     self.recallStatus = {}
     self.recallTimes = {
-        ['recall'] = 7.9,
-        ['odinrecall'] = 4.4,
-        ['odinrecallimproved'] = 3.9,
-        ['recallimproved'] = 6.9,
-        ['superrecall'] = 3.9,
-    }
+        			   ['recall'] = 7.9,
+        			   ['odinrecall'] = 4.4,
+        			   ['odinrecallimproved'] = 3.9,
+        			   ['recallimproved'] = 6.9,
+        			   ['superrecall'] = 3.9,
+    				   }
     self.activeRecalls = {}
     self.lasttime={}
 
@@ -445,8 +461,10 @@ function BaseUlt:__init()
         end
     end)
 end
+
 function BaseUlt:BaseUltGetBaseCoords()
-    if myHero.team == TEAM_BLUE then
+	local okey = mh.team == 100
+    if okey then
         return self.BaseSpots[2]
     else
         return self.BaseSpots[1]
@@ -464,17 +482,15 @@ function BaseUlt:GetDamage(spell, unit)
        end
 end
 function BaseUlt:BaseUltPredictIfUltCanKill(target)
-    if myHero.charName == "Ezreal" or myHero.charName == "Jinx" or myHero.charName == "Draven" or myHero.charName == "Ashe" then
-        if self:GetDamage(_R, target.object) > target.startHP + (target.hpRegen * 7.9)  then
-            return true
-        else
-            return false
-        end
-    end
+	if self:GetDamage(_R, target.object) > target.startHP + (target.hpRegen * 7.9)  then
+		return true
+	else
+		return false
+	end
 end
 function BaseUlt:BaseUlt()
-    if not myHero.dead and Menu.BaseUlt.BaseUlt then
-        self.time = GetDistance(myHero, self.BaseSpots[2]) / 2000
+    if not mh.dead and Menu.BaseUlt.BaseUlt then
+        self.time = GetDistance(mh, self.BaseSpots[2]) / 2000
         for i, snipeTarget in pairs(self.activeRecalls) do
             if (snipeTarget.endT - os.clock()) <= self.time + 1 and (snipeTarget.endT - os.clock()) >= self.time + .5 and self:BaseUltPredictIfUltCanKill(snipeTarget) then
                 CastSpell(_R, self:BaseUltGetBaseCoords().x, self:BaseUltGetBaseCoords().z)
@@ -500,7 +516,7 @@ function BaseUlt:recallFunction(Hero, Status)
                                 startHP = o.health,
                                 hpRegen = o.hpRegen,
                                 object = o
-                            }
+                           		}
             return
         elseif self.activeRecalls[o.networkID] then
             if self.activeRecalls[o.networkID] and self.activeRecalls[o.networkID].endT > os.clock() then
@@ -529,6 +545,7 @@ function BaseUlt:recallFunction(Hero, Status)
     end
 end
 function BaseUlt:DrawBaseUlt()
+    local function ReturnColor(color) return ARGB(color[1],color[2],color[3],color[4]) end
     local function BaseUltProgressBar(x, y, percent, text, tick)
         DrawRectangle(x, y - 5, 300, 40, ARGB(255,100,100,100))
         DrawRectangle(x + 5, y, 290, 30, ARGB(255,30,30,30))
@@ -542,16 +559,16 @@ function BaseUlt:DrawBaseUlt()
         DrawText(text,20,y + 8,x + 5,ARGB(255,255,255,255))
     end
     
-    -- MAKE SURE TO ADJUST THE MENU!!! --
     if Menu.BaseUlt.BaseUlt and Menu.BaseUlt.BaseUltDraw then
         for i, enemy in pairs(self.activeRecalls) do
              if self:BaseUltPredictIfUltCanKill(enemy) then
-                 BaseUltProgressBar(500,500,(enemy.endT - os.clock()) / 7.9 * 100, enemy.name, ((GetDistance(myHero, self:BaseUltGetBaseCoords()) / 2000) + 1) / 8 * 100)
+                 BaseUltProgressBar(500,500,(enemy.endT - os.clock()) / 7.9 * 100, enemy.name, ((GetDistance(mh, self:BaseUltGetBaseCoords()) / 2000) + 1) / 8 * 100)
              end
         end
     end
 end
 
+--[[ Script S1mple Lib ]]
 class "_Required"
 function _Required:__init()
     self.requirements = {}
@@ -739,4 +756,23 @@ function _Downloader:Base64Encode(data)
     end)..({ '', '==', '=' })[#data%3+1])
 end
 
--- The End
+--[[ Script Autodownloader ]]
+	function Update()
+		if AUTOUPDATE then
+			local ServerData = GetWebResult(UPDATE_HOST, "/vankatze/vktz/blob/master/The-nabo.version")
+				if ServerData then
+					ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+						if ServerVersion then
+							if tonumber(version) < ServerVersion then
+								DelayAction(function() print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">New version found for The Nabo... <font color=\"#000000\"> | </font><font color=\"#FF0000\"></font><font color=\"#FF0000\"><b> Version "..ServerVersion.."</b></font>") end, 3)
+								DelayAction(function() print("<font color=\"#FFFFFF\"><b> >> Updating, please don't press F9 << </b></font>") end, 4)
+								DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The Nabo</font> <font color=\"#000000\"> | </font><font color=\"#FF0000\">UPDATED <font color=\"#FF0000\"><b>("..version.." => "..ServerVersion..")</b></font> Press F9 twice to load the updated version.") end) end, 5)
+							else
+								DelayAction(function() print("<b><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The Nabo</font><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0000\"> Version "..ServerVersion.."</b></font>") end, 1)
+								end
+						end
+					else
+				DelayAction(function() print("<font color=\"#FFFFFF\">The Nabo - Error while downloading version info, RE-DOWNLOAD MANUALLY.</font>")end, 1)
+			end
+		end
+	end
