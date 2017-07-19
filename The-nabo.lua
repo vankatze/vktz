@@ -1,28 +1,26 @@
 local ScriptName = "The-nabo"
 local AUTOUPDATES = true
-local Author = "Vankatze"
-local version = 1.1
+local Author = "VANKARRO"
+local version = 2.0
+local mh = myHero
+local cha = mh.charName
 
-if myHero.charName ~= "Ezreal" then return end --Revisar si es el champ
+if cha ~= "Ezreal" then return end --Revisar si es el champ
 
 local Q, W, E, R, Ignite = nil, nil, nil, nil, nil --Lo que vas a usar lo deja nil para despues asignarle valor
 local TS, Menu = nil, nil
 local PredictedDamage = {}
 local RefreshTime = 0.4
-local mh = myHero
+
 local DefensiveItems = nil 
 local CastableItems = {
-    Tiamat      = { Range = 300 , Slot   = function() return FindItemSlot("TiamatCleave") end,  reqTarget = false,  IsReady                             = function() return (FindItemSlot("TiamatCleave") ~= nil and mh:CanUseSpell(FindItemSlot("TiamatCleave")) == READY) end, Damage = function(target) return getDmg("TIAMAT", target, mh) end},
     Bork        = { Range = 650 , Slot   = function() return FindItemSlot("SwordOfFeastAndFamine") end,  reqTarget = true,  IsReady                     = function() return (FindItemSlot("SwordOfFeastAndFamine") ~= nil and mh:CanUseSpell(FindItemSlot("SwordOfFeastAndFamine")) == READY) end, Damage = function(target) return getDmg("RUINEDKING", target, mh) end},
     Bwc         = { Range = 650 , Slot   = function() return FindItemSlot("BilgewaterCutlass") end,  reqTarget = true,  IsReady                         = function() return (FindItemSlot("BilgewaterCutlass") ~= nil and mh:CanUseSpell(FindItemSlot("BilgewaterCutlass")) == READY) end, Damage = function(target) return getDmg("BWC", target, mh) end},
     Hextech     = { Range = 750 , Slot   = function() return FindItemSlot("HextechGunblade") end,  reqTarget = true,    IsReady                         = function() return (FindItemSlot("HextechGunblade") ~= nil and mh:CanUseSpell(FindItemSlot("HextechGunblade")) == READY) end, Damage = function(target) return getDmg("HXG", target, mh) end},
-    Blackfire   = { Range = 750 , Slot   = function() return FindItemSlot("BlackfireTorch") end,  reqTarget = true,   IsReady                           = function() return (FindItemSlot("BlackfireTorch") ~= nil and mh:CanUseSpell(FindItemSlot("BlackfireTorch")) == READY) end, Damage = function(target) return getDmg("BLACKFIRE", target, mh) end},
-    Youmuu      = { Range = mh.range + mh.boundingRadius + 350 , Slot   = function() return FindItemSlot("YoumusBlade") end,  reqTarget = false,  IsReady                              = function() return (FindItemSlot("YoumusBlade") ~= nil and mh:CanUseSpell(FindItemSlot("YoumusBlade")) == READY) end, Damage = function(target) return 0 end},
-    Randuin     = { Range = 500 , Slot   = function() return FindItemSlot("RanduinsOmen") end,  reqTarget = false,  IsReady                             = function() return (FindItemSlot("RanduinsOmen") ~= nil and mh:CanUseSpell(FindItemSlot("RanduinsOmen")) == READY) end, Damage = function(target) return 0 end},
-    TwinShadows = { Range = 1000, Slot   = function() return FindItemSlot("ItemWraithCollar") end,  reqTarget = false,  IsReady                         = function() return (FindItemSlot("ItemWraithCollar") ~= nil and mh:CanUseSpell(FindItemSlot("ItemWraithCollar")) == READY) end, Damage = function(target) return 0 end},
 }
 
 function OnLoad() -- Sirve para cargar todas las weas
+    BaseUlt()
     print("<b><font color=\"#FF0077\">EzzY - The true Nabo : </font></b><font color=\"#FFCB0F\"> Funny for you ! </font><font color=\"#FF0077\">| Vankatze |</font>")
     local r = _Required()
     r:Add({Name = "SimpleLib", Url = "raw.githubusercontent.com/jachicao/BoL/master/SimpleLib.lua"})
@@ -45,7 +43,7 @@ function OnLoad() -- Sirve para cargar todas las weas
 
     TS:AddToMenu(Menu)
 
-    Menu:addSubMenu(myHero.charName.." - Combo Settings", "Combo")
+    Menu:addSubMenu(cha.." - Combo Settings", "Combo")
         Menu.Combo:addParam("Overkill", "Overkill % for Dmg Predict..", SCRIPT_PARAM_SLICE, 10, 0, 100, 0)
         Menu.Combo:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
         Menu.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, true)
@@ -54,30 +52,30 @@ function OnLoad() -- Sirve para cargar todas las weas
         Menu.Combo:addParam("useR2", "Use R If Enemies >=", SCRIPT_PARAM_SLICE, math.min(#GetEnemyHeroes(), 3), 0, 5, 0)
         Menu.Combo:addParam("Zhonyas", "Use Zhonyas if HP % <=", SCRIPT_PARAM_SLICE, 10, 0, 100, 0)
 
-    Menu:addSubMenu(myHero.charName.." - Harass Settings", "Harass")
+    Menu:addSubMenu(cha.." - Harass Settings", "Harass")
         Menu.Harass:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
         Menu.Harass:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, true)
         Menu.Harass:addParam("Mana", "Min. Mana Percent: ", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 
-    Menu:addSubMenu(myHero.charName.." - LaneClear Settings", "LaneClear")
+    Menu:addSubMenu(cha.." - LaneClear Settings", "LaneClear")
         Menu.LaneClear:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
         Menu.LaneClear:addParam("Mana", "Min. Mana Percent: ", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 
-    Menu:addSubMenu(myHero.charName.." - LastHit Settings", "LastHit")
+    Menu:addSubMenu(cha.." - LastHit Settings", "LastHit")
         Menu.LastHit:addParam("useQ", "Use Q", SCRIPT_PARAM_LIST, 2, {"Never", "Smart", "Always"})
         Menu.LastHit:addParam("Mana", "Min. Mana Percent:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 
-    Menu:addSubMenu(myHero.charName.." - JungleClear Settings", "JungleClear")
+    Menu:addSubMenu(cha.." - JungleClear Settings", "JungleClear")
         Menu.JungleClear:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
 
-    Menu:addSubMenu(myHero.charName.." - KillSteal Settings", "KillSteal")
+    Menu:addSubMenu(cha.." - KillSteal Settings", "KillSteal")
         Menu.KillSteal:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
         Menu.KillSteal:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, true)
         Menu.KillSteal:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
         Menu.KillSteal:addParam("useR", "Use R (Not Recomended)", SCRIPT_PARAM_ONOFF, true)
         Menu.KillSteal:addParam("useIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
 
-        Menu:addSubMenu(myHero.charName.." - Auto Settings", "Auto")
+        Menu:addSubMenu(cha.." - Auto Settings", "Auto")
             Menu.Auto:addSubMenu("Use E To Evade", "UseE")
             _Evader(Menu.Auto.UseE):CheckCC():AddCallback(
                 function(target)
@@ -94,26 +92,31 @@ function OnLoad() -- Sirve para cargar todas las weas
                     end
                 end)
 
-    Menu:addSubMenu(myHero.charName.." - Misc Settings", "Misc")
+    Menu:addSubMenu(cha.." - Misc Settings", "Misc")
         Menu.Misc:addParam("SetSkin", "Select Skin", SCRIPT_PARAM_LIST, 14, {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"})
 
-    Menu:addSubMenu(myHero.charName.." - Keys Settings", "Keys")
+    Menu:addSubMenu(cha.." - Keys Settings", "Keys")
         OrbwalkManager:LoadCommonKeys(Menu.Keys)
         Menu.Keys:addParam("HarassToggle", "Harass (Toggle)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
         OrbwalkManager:AddKey({Name = "AssistedUltimate", Text = "Assisted Ultimate (Near Mouse)", Key = string.byte("T"), Mode = ORBWALK_MODE.COMBO})
-        Menu.Keys:addParam("Flee", "Flee Like a Girl", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("S"))
+        Menu.Keys:addParam("Flee", "Run Pussy Run", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("S"))
         Menu.Keys:permaShow("HarassToggle")
         Menu.Keys:permaShow("Flee")
         Menu.Keys.HarassToggle = false
         Menu.Keys.AssistedUltimate = false
         Menu.Keys.Flee = false
+
+    Menu:addSubMenu(cha.." - BaseUlt Settings", "BaseUlt")
+        Menu.BaseUlt:addParam("BaseUlt", "Enable base ult", 1, true)
+        Menu.BaseUlt:addParam("BaseUltDraw", "Draw base ult", 1, true)
+        Menu.BaseUlt:addParam("Verbose", "Track enemy recall in chat", 1, true)
 end
 
 function OnTick()
     if Menu == nil then return end
     TS:update()
     KillSteal()
-    SetSkin(myHero, Menu.Misc.SetSkin)
+    SetSkin(mh, Menu.Misc.SetSkin)
     if OrbwalkManager:IsCombo() then
         Combo()
     elseif OrbwalkManager:IsHarass() then
@@ -139,6 +142,31 @@ function OnTick()
     end
 end
 
+class "ThreshLantern"
+function ThreshLantern:__init()
+    self.lantern = nil
+
+    AddTickCallback(function() self:OnTick() end)
+    AddCreateObjCallback(function(a) self:OnCreateObj(a) end)
+    AddDeleteObjCallback(function(a) self:OnDeleteObj(a) end)
+end
+function ThreshLantern:OnTick()
+    if self.lantern ~= nil and LulzMenu.Hotkeys.FleeKey then
+        if GetDistanceSqr(self.lantern) < 90000 then
+            self.lantern:Interact()
+        end
+    end
+end
+function ThreshLantern:OnCreateObj(obj)
+    if obj.name == "ThreshLantern" then
+        self.lantern = obj
+    end
+end
+function ThreshLantern:OnDeleteObj(obj)
+    if obj.name == "ThreshLantern" then
+        self.lantern = nil
+    end
+end
 function Collides(vec)
     return IsWall(D3DXVECTOR3(vec.x, vec.y, vec.z))
 end
@@ -146,12 +174,13 @@ end
 
 function KillSteal()
     for idx, enemy in ipairs(GetEnemyHeroes()) do
-        if ValidTarget(enemy, TS.range) and enemy.health > 0 and enemy.health/enemy.maxHealth <= 0.3 then
+        local ok = enemy.health/enemy.maxHealth <= 0.3
+        if ValidTarget(enemy, TS.range) and enemy.health > 0 and ok then
             local q, w, e, r, dmg = GetBestCombo(enemy)
-            if dmg >= enemy.health then
-                if Menu.KillSteal.useQ and Q:Damage(enemy) >= enemy.health and not enemy.dead then Q:Cast(enemy) end
-                if Menu.KillSteal.useW and W:Damage(enemy) >= enemy.health and not enemy.dead then W:Cast(enemy) end
-                if Menu.KillSteal.useR and R:Damage(enemy) >= enemy.health and not enemy.dead then R:Cast(enemy) end
+            if dmg >= enemy.health and not enemy.dead then
+                if Menu.KillSteal.useQ and Q:Damage(enemy) >= enemy.health then Q:Cast(enemy) end
+                if Menu.KillSteal.useW and W:Damage(enemy) >= enemy.health then W:Cast(enemy) end
+                if Menu.KillSteal.useR and R:Damage(enemy) >= enemy.health then R:Cast(enemy) end
             end
             if Menu.KillSteal.useIgnite and Ignite:IsReady() and Ignite:Damage(enemy) >= enemy.health and not enemy.dead then Ignite:Cast(enemy) end
         end
@@ -195,7 +224,7 @@ end
 function Correr()
     local target = TS.target
     if Menu.Keys.Flee then
-        myHero:MoveTo(mousePos.x, mousePos.z)
+        mh:MoveTo(mousePos.x, mousePos.z)
     end
     if E:IsReady() then
         CastSpell(_E, mousePos.x, mousePos.z)
@@ -204,7 +233,8 @@ end
 
 function Harass()
     local target = TS.target
-    if myHero.mana / myHero.maxMana * 100 >= Menu.Harass.Mana then
+    local kek = mh.mana / mh.maxMana * 100 >= Menu.Harass.Mana
+    if kek then
         if ValidTarget(target) then
             if Menu.Harass.useQ then
                 Q:Cast(target)
@@ -217,7 +247,8 @@ function Harass()
 end
 
 function Clear()
-    if myHero.mana / myHero.maxMana * 100 >= Menu.Harass.Mana then
+    local kek = mh.mana / mh.maxMana * 100 >= Menu.Harass.Mana
+    if kek then
         if Menu.LaneClear.useQ then
             Q:LaneClear()
         end
@@ -228,24 +259,26 @@ function Clear()
 end
 
 function LastHit()
-    if myHero.mana/myHero.maxMana * 100 >= Menu.LastHit.Mana then
+    local kek = mh.mana/mh.maxMana * 100 >= Menu.LastHit.Mana
+    if kek then
         Q:LastHit({Mode = Menu.LastHit.Q})
     end
 end
 
 function PercentageMana(u)
-    local unit = u ~= nil and u or myHero
+    local unit = u ~= nil and u or mh
     return unit and unit.mana/unit.maxMana * 100 or 0
 end
 
 function PercentageHealth(u)
-    local unit = u ~= nil and u or myHero
+    local unit = u ~= nil and u or mh
     return unit and unit.health/unit.maxHealth * 100 or 0
 end
 
 
 function GetOverkill()
-    return (100 + Menu.Combo.Overkill)/100
+    local over = (100 + Menu.Combo.Overkill)/100
+    return over
 end
 
 function GetBestCombo(target)
@@ -257,7 +290,8 @@ function GetBestCombo(target)
     local damagetable = PredictedDamage[target.networkID]
     if damagetable ~= nil then
         local time = damagetable[6]
-        if os.clock() - time <= RefreshTime then 
+        local osc = os.clock()
+        if osc - time <= RefreshTime then 
             return damagetable[1], damagetable[2], damagetable[3], damagetable[4], damagetable[5] 
         else
             if Q:IsReady() then q = {false, true} end
@@ -274,7 +308,7 @@ function GetBestCombo(target)
                         for eCount = 1, #e do
                             for rCount = 1, #r do
                                 local d, m = GetComboDamage(target, q[qCount], w[wCount], e[eCount], r[rCount])
-                                if d >= target.health and myHero.mana >= m then
+                                if d >= target.health and mh.mana >= m then
                                     if d < bestdmg then 
                                         bestdmg = d 
                                         best = {q[qCount], w[wCount], e[eCount], r[rCount]} 
@@ -299,7 +333,7 @@ function GetBestCombo(target)
                         for eCount = 1, #e do
                             for rCount = 1, #r do
                                 local d, m = GetComboDamage(target, q[qCount], w[wCount], e[eCount], r[rCount])
-                                if d > bestdmg and myHero.mana > m then 
+                                if d > bestdmg and mh.mana > m then 
                                     table2 = {q[qCount],w[wCount],e[eCount],r[rCount]}
                                     bestdmg = d
                                 end
@@ -345,7 +379,7 @@ function GetComboDamage(target, q, w, e, r)
             currentManaWasted = currentManaWasted + R:Mana()
         end
         if Ignite:IsReady() then comboDamage = comboDamage + Ignite:Damage(target) end
-        comboDamage = comboDamage + getDmg("AD", target, myHero) * 2
+        comboDamage = comboDamage + getDmg("AD", target, mh) * 2
     end
     comboDamage = comboDamage * GetOverkill()
     return comboDamage, currentManaWasted
@@ -365,6 +399,155 @@ function UseItems(unit)
     if ValidTarget(unit) then
         for _, item in pairs(CastableItems) do
             Cast_Item(item, unit)
+        end
+    end
+end
+
+class "BaseUlt"
+function BaseUlt:__init()
+    self.enemyHeros = GetEnemyHeroes()
+  self.SpellTable = {
+        
+        R = {range = 9999, speed = 2000, delay = 1, width = 150, collision = false}
+    }
+
+    self.spellDmg = {
+        
+         [_R] = function(unit) if self.RState then return myHero:CalcMagicDamage(unit, ((((myHero:GetSpellData(_R).level * 150) + 200) + (myHero.ap * 0.9)) + myHero.addDamage)) end end
+    }
+    self.BaseSpots = {
+             D3DXVECTOR3(396,182.132,462),
+             D3DXVECTOR3(14340.418,171.9777,14391.075)
+         }
+
+    self.recallStatus = {}
+    self.recallTimes = {
+        ['recall'] = 7.9,
+        ['odinrecall'] = 4.4,
+        ['odinrecallimproved'] = 3.9,
+        ['recallimproved'] = 6.9,
+        ['superrecall'] = 3.9,
+    }
+    self.activeRecalls = {}
+    self.lasttime={}
+
+    for i, enemy in pairs(self.enemyHeros) do
+        self.recallStatus[enemy.charName] = enemy.recall
+    end
+    AddDrawCallback(function() self:DrawBaseUlt() end)
+    AddTickCallback(function() self:BaseUlt() end)
+    AddTickCallback(function()
+        for i, enemy in pairs(self.enemyHeros) do
+            if enemy.recall ~= self.recallStatus[enemy.charName] then
+                self:recallFunction(enemy, enemy.recall)
+            end
+            self.recallStatus[enemy.charName] = enemy.recall
+        end
+    end)
+end
+function BaseUlt:BaseUltGetBaseCoords()
+    if myHero.team == TEAM_BLUE then
+        return self.BaseSpots[2]
+    else
+        return self.BaseSpots[1]
+    end
+end
+function BaseUlt:GetDamage(spell, unit)
+    if spell == "ALL" then
+        local sum = 0
+          for spell, func in pairs(self.spellDmg) do
+            sum = sum + (func(unit) or 0)
+          end
+         return sum
+       else
+          return self.spellDmg[spell](unit) or 0
+       end
+end
+function BaseUlt:BaseUltPredictIfUltCanKill(target)
+    if myHero.charName == "Ezreal" or myHero.charName == "Jinx" or myHero.charName == "Draven" or myHero.charName == "Ashe" then
+        if self:GetDamage(_R, target.object) > target.startHP + (target.hpRegen * 7.9)  then
+            return true
+        else
+            return false
+        end
+    end
+end
+function BaseUlt:BaseUlt()
+    if not myHero.dead and Menu.BaseUlt.BaseUlt then
+        self.time = GetDistance(myHero, self.BaseSpots[2]) / 2000
+        for i, snipeTarget in pairs(self.activeRecalls) do
+            if (snipeTarget.endT - os.clock()) <= self.time + 1 and (snipeTarget.endT - os.clock()) >= self.time + .5 and self:BaseUltPredictIfUltCanKill(snipeTarget) then
+                CastSpell(_R, self:BaseUltGetBaseCoords().x, self:BaseUltGetBaseCoords().z)
+            end
+        end
+    end
+end
+function BaseUlt:recallFunction(Hero, Status)
+    local o = Hero
+    if o and o.valid and o.type == 'AIHeroClient' then
+        local str = Status
+        if self.recallTimes[str:lower()] then
+            if Menu.BaseUlt.Verbose then
+                if not o.visible and self.lasttime[o.networkID]  then
+                    print(r.name.." is recalling. Last seen "..string.format("%.1f", os.clock() -self.lasttime[o.networkID], 1).." seconds ago." )
+                end
+            end
+            self.activeRecalls[o.networkID] = {
+                                name = o.charName,
+                                startT = os.clock(),
+                                duration = self.recallTimes[str:lower()],
+                                endT = os.clock() + self.recallTimes[str:lower()],
+                                startHP = o.health,
+                                hpRegen = o.hpRegen,
+                                object = o
+                            }
+            return
+        elseif self.activeRecalls[o.networkID] then
+            if self.activeRecalls[o.networkID] and self.activeRecalls[o.networkID].endT > os.clock() then
+                if Menu.BaseUlt.Verbose then
+                    print(self.activeRecalls[o.networkID].name.." canceled recall")
+                end
+                recallTime = nil
+                recallName = nil
+                blockName = nil
+                self.activeRecalls[o.networkID] = nil
+                return
+            else
+                if junglerName == self.activeRecalls[o.networkID].name then
+                    jungleText = "Recalled"
+                end
+                if Menu.BaseUlt.Verbose then
+                    print(self.activeRecalls[o.networkID].name.." finished recall")
+                end
+                self.activeRecalls[o.networkID] = nil
+                recallTime = nil
+                recallName = nil
+                blockName = nil
+                return
+            end
+        end
+    end
+end
+function BaseUlt:DrawBaseUlt()
+    local function BaseUltProgressBar(x, y, percent, text, tick)
+        DrawRectangle(x, y - 5, 300, 40, ARGB(255,100,100,100))
+        DrawRectangle(x + 5, y, 290, 30, ARGB(255,30,30,30))
+        DrawRectangle(x + 5, y, (percent/100)*290, 30, ARGB(255,255,0,0))
+        DrawRectangle(x + (6.9 / 7.9 * 290), y, (100/100)*290 - x + (6.9 / 7.9 * 290), 30, ARGB(100,30,30,30))
+        if tick <= 100 then
+            DrawRectangle(x + 5 + (tick/100)*290, y, 2, 30, ARGB(255,0,255,0))
+        else
+            DrawRectangle(x + 5 + (100/100)*290, y, 2, 30, ARGB(255,0,255,0))
+        end
+        DrawText(text,20,y + 8,x + 5,ARGB(255,255,255,255))
+    end
+    
+    -- MAKE SURE TO ADJUST THE MENU!!! --
+    if Menu.BaseUlt.BaseUlt and Menu.BaseUlt.BaseUltDraw then
+        for i, enemy in pairs(self.activeRecalls) do
+             if self:BaseUltPredictIfUltCanKill(enemy) then
+                 BaseUltProgressBar(500,500,(enemy.endT - os.clock()) / 7.9 * 100, enemy.name, ((GetDistance(myHero, self:BaseUltGetBaseCoords()) / 2000) + 1) / 8 * 100)
+             end
         end
     end
 end
