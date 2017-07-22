@@ -5,7 +5,7 @@
  local AUTOUPDATE = true
  local UPDATE_HOST = "raw.githubusercontent.com"
  local ran = math.random
- local UPDATE_PATH = "vankatze/vktz/blob/master/The-nabo.lua".."?rand="..ran(3500,5500)
+ local UPDATE_PATH = "vankatze/vktz/master/The-nabo.lua".."?rand="..ran(3500,5500)
  local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
  local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
@@ -759,7 +759,7 @@ end
 --[[ Script Autodownloader ]]
 	function Update()
 		if AUTOUPDATE then
-			local ServerData = GetWebResult(UPDATE_HOST, "/vankatze/vktz/blob/master/The-nabo.version")
+			local ServerData = GetWebResult(UPDATE_HOST, "/vankatze/vktz/master/The-nabo.version")
 				if ServerData then
 					ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 						if ServerVersion then
