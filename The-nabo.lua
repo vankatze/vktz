@@ -1,11 +1,11 @@
 --[[ Script AutoUpdater ]]
- local version = "2.0"
+ local versionn = "2.0"
  local author = "Vankatze"
  local SCRIPT_NAME = "The_Nabo"
  local AUTOUPDATE = true
  local UPDATE_HOST = "raw.githubusercontent.com"
  local ran = math.random
- local UPDATE_PATH = "vankatze/vktz/master/The-nabo.lua".."?rand="..ran(3500,5500)
+ local UPDATE_PATH = "vankatze/vktz/blob/master/The-nabo.lua".."?rand="..ran(3500,5500)
  local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
  local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
@@ -759,14 +759,14 @@ end
 --[[ Script Autodownloader ]]
 	function Update()
 		if AUTOUPDATE then
-			local ServerData = GetWebResult(UPDATE_HOST, "/vankatze/vktz/master/The-nabo.version")
+			local ServerData = GetWebResult(UPDATE_HOST, "/vankatze/vktz/blob/master/The-nabo.version")
 				if ServerData then
 					ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 						if ServerVersion then
-							if tonumber(version) < ServerVersion then
+							if tonumber(versionn) < ServerVersion then
 								DelayAction(function() print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">New version found for The Nabo... <font color=\"#000000\"> | </font><font color=\"#FF0000\"></font><font color=\"#FF0000\"><b> Version "..ServerVersion.."</b></font>") end, 3)
 								DelayAction(function() print("<font color=\"#FFFFFF\"><b> >> Updating, please don't press F9 << </b></font>") end, 4)
-								DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The Nabo</font> <font color=\"#000000\"> | </font><font color=\"#FF0000\">UPDATED <font color=\"#FF0000\"><b>("..version.." => "..ServerVersion..")</b></font> Press F9 twice to load the updated version.") end) end, 5)
+								DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The Nabo</font> <font color=\"#000000\"> | </font><font color=\"#FF0000\">UPDATED <font color=\"#FF0000\"><b>("..versionn.." => "..ServerVersion..")</b></font> Press F9 twice to load the updated version.") end) end, 5)
 							else
 								DelayAction(function() print("<b><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The Nabo</font><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0000\"> Version "..ServerVersion.."</b></font>") end, 1)
 								end
