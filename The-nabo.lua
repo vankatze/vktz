@@ -1,19 +1,14 @@
 --[[ Script AutoUpdater ]]
- local versionn = "2.0"
- local author = "Vankatze"
- local SCRIPT_NAME = "The_Nabo"
+ local Author = "Vankatze"
+ local version = "2.0"
+ local SCRIPT_NAME = "The Nabo"
  local AUTOUPDATE = true
  local UPDATE_HOST = "raw.githubusercontent.com"
- local ran = math.random
- local UPDATE_PATH = "vankatze/vktz/blob/master/The-nabo.lua".."?rand="..ran(3500,5500)
+ local UPDATE_PATH = "/vankatze/vktz/master/The-nabo.lua".."?rand="..math.random(2500,3500)
  local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
  local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
 --[[ Local General ]]
-local ScriptName = "The Nabo"
-local AUTOUPDATES = true
-local Author = "Vankatze"
-local version = 1
 local mh = myHero
 local cha = mh.charName
 local pi, pi2, sin, cos, huge, sqrt, floor, ceil, max, random, round = math.pi, 2*math.pi, math.sin, math.cos, math.huge, math.sqrt, math.floor, math.ceil, math.max, math.random, math.round
@@ -26,91 +21,87 @@ local TS, Menu = nil, nil
 local PredictedDamage = {}
 local RefreshTime = 0.4
 local DefensiveItems = nil 
-local CastableItems = {
-    Bork        = { Range = 650 , Slot = function() return FindItemSlot("SwordOfFeastAndFamine") end, reqTarget = true, IsReady = function() return (FindItemSlot("SwordOfFeastAndFamine") ~= nil and mh:CanUseSpell(FindItemSlot("SwordOfFeastAndFamine")) == READY) end, Damage = function(target) return getDmg("RUINEDKING", target, mh) end},
-    Bwc         = { Range = 650 , Slot = function() return FindItemSlot("BilgewaterCutlass") end, reqTarget = true, IsReady = function() return (FindItemSlot("BilgewaterCutlass") ~= nil and mh:CanUseSpell(FindItemSlot("BilgewaterCutlass")) == READY) end, Damage = function(target) return getDmg("BWC", target, mh) end},
-    Hextech     = { Range = 750 , Slot = function() return FindItemSlot("HextechGunblade") end, reqTarget = true, IsReady = function() return (FindItemSlot("HextechGunblade") ~= nil and mh:CanUseSpell(FindItemSlot("HextechGunblade")) == READY) end, Damage = function(target) return getDmg("HXG", target, mh) end},
-	}
+local CastableItems = { Bork = { Range = 650 , Slot = function() return FindItemSlot("SwordOfFeastAndFamine") end, reqTarget = true, IsReady = function() return (FindItemSlot("SwordOfFeastAndFamine") ~= nil and mh:CanUseSpell(FindItemSlot("SwordOfFeastAndFamine")) == READY) end, Damage = function(target) return getDmg("RUINEDKING", target, mh) end},
+                        Bwc = { Range = 650 , Slot = function() return FindItemSlot("BilgewaterCutlass") end, reqTarget = true, IsReady = function() return (FindItemSlot("BilgewaterCutlass") ~= nil and mh:CanUseSpell(FindItemSlot("BilgewaterCutlass")) == READY) end, Damage = function(target) return getDmg("BWC", target, mh) end},
+                        Hextech = { Range = 750 , Slot = function() return FindItemSlot("HextechGunblade") end, reqTarget = true, IsReady = function() return (FindItemSlot("HextechGunblade") ~= nil and mh:CanUseSpell(FindItemSlot("HextechGunblade")) == READY) end, Damage = function(target) return getDmg("HXG", target, mh) end},
+                        }
 
 if cha ~= "Ezreal" then return end
 
 --[[ Script Menu ]]
-function OnLoad() BaseUlt()
-    print("<b><font color=\"#FF0077\">EzzY - The truly Nabo : </font></b><font color=\"#FFCB0F\"> Funny for you ! </font><font color=\"#FF0077\">| Vankatze |</font>")
-    local r = _Required()
-    r:Add({Name = "SimpleLib", Url = "raw.githubusercontent.com/jachicao/BoL/master/SimpleLib.lua"})
-    r:Check()
-    if OrbwalkManager.GotReset then return end
-    if r:IsDownloading() then return end
-    if OrbwalkManager == nil then print("Check your SimpleLib file, isn't working... The script can't load without SimpleLib. Try to copy-paste the entire SimpleLib.lua on your common folder.") return end
-    DelayAction(function() CheckUpdate() end, 5)
-    DelayAction(function() _arrangePriorities() end, 10)
-    TS = _SimpleTargetSelector(TARGET_LESS_CAST_PRIORITY, 1150, DAMAGE_PHYSICAL)
-    Menu = scriptConfig(ScriptName.." by "..Author, ScriptName.."24052015")
-    DefensiveItems = {
-            Zhonyas     = _Spell({Range = 1000, Type = SPELL_TYPE.SELF}):AddSlotFunction(function() return FindItemSlot("ZhonyasHourglass") end),
-        }
+function OnLoad() BaseUlt() Update() SimpleLibUpdater()
+    DelayAction(function()print("<b><font color=\"#000000\"> | </font><font color=\"#FF0077\">EzzY - The truly Nabo</font><font color=\"#000000\"> | </font></b><font color=\"#FFCB0F\">Funny for you !</font><font color=\"#000000\"> | </font><font color=\"#FF0077\">by Vankatze</font><font color=\"#000000\"> | </font>")end, 5)
+    DefensiveItems = { Zhonyas     = _Spell({Range = 1000, Type = SPELL_TYPE.SELF}):AddSlotFunction(function() return FindItemSlot("ZhonyasHourglass") end),
+                     }
     Q = _Spell({Slot = _Q, DamageName = "Q", Range = 1050, Width = 58, Delay = 0.25, Speed = 2000, Aoe = false, Collision = true, Type = SPELL_TYPE.LINEAR}):AddDraw()
     W = _Spell({Slot = _W, DamageName = "W", Range = 1000, Width = 80, Delay = 0.25, Speed = 1600, Aoe = false, Collision = false, Type = SPELL_TYPE.LINEAR}):AddDraw()
     E = _Spell({Slot = _E, DamageName = "E", Range = 475, Width = 60, Delay = 0.25, Speed = 2000, Aoe = false, Collision = false, Type = SPELL_TYPE.CIRCULAR}):AddDraw()
-    Ignite = _Spell({Slot = FindSummonerSlot("summonerdot"), DamageName = "IGNITE", Range = 600, Type = SPELL_TYPE.TARGETTED})
     R = _Spell({Slot = _R, DamageName = "R", Range = 2500, Width = 160, Delay = 1, Speed = 2000, Collision = false, Aoe = true, Type = SPELL_TYPE.LINEAR}):AddDraw()
+    Ignite = _Spell({Slot = FindSummonerSlot("summonerdot"), DamageName = "IGNITE", Range = 600, Type = SPELL_TYPE.TARGETTED})
 
+    Menu = scriptConfig(SCRIPT_NAME.." by "..Author, SCRIPT_NAME)
+    TS = _SimpleTargetSelector(TARGET_LESS_CAST_PRIORITY, 1250, DAMAGE_PHYSICAL)
     TS:AddToMenu(Menu)
 
-    Menu:addSubMenu(cha.." - Combo Settings", "Combo")
-        Menu.Combo:addParam("Overkill", "Overkill % for Dmg Predict..", SCRIPT_PARAM_SLICE, 10, 0, 100, 0)
+    Menu:addSubMenu(cha.." - Combo", "Combo")
         Menu.Combo:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
+        Menu.Combo:addParam("1","",SCRIPT_PARAM_INFO,"")
         Menu.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, true)
-        Menu.Combo:addParam("useE", "Use E to mouse pos", SCRIPT_PARAM_ONOFF, false)
+        Menu.Combo:addParam("ManaW", "Min. Mana Use W: ", SCRIPT_PARAM_SLICE, 10, 0, 100, 0)
+        Menu.Combo:addParam("2","",SCRIPT_PARAM_INFO,"")
+        Menu.Combo:addParam("useE", "Use E to Mouse", SCRIPT_PARAM_ONOFF, false)
+        Menu.Combo:addParam("3","",SCRIPT_PARAM_INFO,"")
         Menu.Combo:addParam("useR", "Use Smart R", SCRIPT_PARAM_ONOFF, false)
         Menu.Combo:addParam("useR2", "Use R If Enemies >=", SCRIPT_PARAM_SLICE, math.min(#GetEnemyHeroes(), 3), 0, 5, 0)
+        Menu.Combo:addParam("4","",SCRIPT_PARAM_INFO,"")
+        Menu.Combo:addParam("Overkill", "Overkill % for Dmg Predict..", SCRIPT_PARAM_SLICE, 10, 0, 100, 0)
         Menu.Combo:addParam("Zhonyas", "Use Zhonyas if HP % <=", SCRIPT_PARAM_SLICE, 10, 0, 100, 0)
 
-    Menu:addSubMenu(cha.." - Harass Settings", "Harass")
+    Menu:addSubMenu(cha.." - Harass", "Harass")
         Menu.Harass:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
-        Menu.Harass:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, true)
-        Menu.Harass:addParam("Mana", "Min. Mana Percent: ", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+        Menu.Harass:addParam("ManaQ", "Min. Mana Use Q: ", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
+        Menu.Harass:addParam("1","",SCRIPT_PARAM_INFO,"")
+        Menu.Harass:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, false)
+        Menu.Harass:addParam("ManaW", "Min. Mana Use W: ", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 
-    Menu:addSubMenu(cha.." - LaneClear Settings", "LaneClear")
-        Menu.LaneClear:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
-        Menu.LaneClear:addParam("Mana", "Min. Mana Percent: ", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-
-    Menu:addSubMenu(cha.." - LastHit Settings", "LastHit")
+    Menu:addSubMenu(cha.." - LastHit", "LastHit")
         Menu.LastHit:addParam("useQ", "Use Q", SCRIPT_PARAM_LIST, 2, {"Never", "Smart", "Always"})
-        Menu.LastHit:addParam("Mana", "Min. Mana Percent:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+        Menu.LastHit:addParam("Mana", "Min. Mana Use Q:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 
-    Menu:addSubMenu(cha.." - JungleClear Settings", "JungleClear")
+    Menu:addSubMenu(cha.." - LaneClear", "LaneClear")
+        Menu.LaneClear:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
+        Menu.LaneClear:addParam("Mana", "Min. Mana Use Q: ", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+
+    Menu:addSubMenu(cha.." - JungleClear", "JungleClear")
         Menu.JungleClear:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
+        Menu.JungleClear:addParam("Mana", "Min. Mana Use Q:", SCRIPT_PARAM_SLICE, 10, 0, 100, 0)
 
-    Menu:addSubMenu(cha.." - KillSteal Settings", "KillSteal")
+    Menu:addSubMenu(cha.." - KillSteal", "KillSteal")
         Menu.KillSteal:addParam("useQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
         Menu.KillSteal:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, true)
-        Menu.KillSteal:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
-        Menu.KillSteal:addParam("useR", "Use R (Not Recomended)", SCRIPT_PARAM_ONOFF, true)
+        Menu.KillSteal:addParam("useE", "Use E (Not Recomended)", SCRIPT_PARAM_ONOFF, false)
+        Menu.KillSteal:addParam("useR", "Use R (Not Recomended)", SCRIPT_PARAM_ONOFF, false)
         Menu.KillSteal:addParam("useIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
 
-        Menu:addSubMenu(cha.." - Auto Settings", "Auto")
-            Menu.Auto:addSubMenu("Use E To Evade", "UseE")
-            _Evader(Menu.Auto.UseE):CheckCC():AddCallback(
-                function(target)
-                    if E:IsReady() and IsValidTarget(target) then
-                        local Position = Vector(mh) + Vector(Vector(target) - Vector(mh)):normalized():perpendicular() * E.Range
-                        local Position2 = Vector(mh) + Vector(Vector(target) - Vector(mh)):normalized():perpendicular2() * E.Range
-                        if not Collides(Position) then
-                            E:CastToVector(Position)
-                        elseif not Collides(Position2) then
-                            E:CastToVector(Position2)
-                        else
-                            E:CastToVector(Position)
-                        end
+    Menu:addSubMenu(cha.." - Evasion with E", "UseE")
+        _Evader(Menu.UseE):CheckCC():AddCallback(
+            function(target)
+                if E:IsReady() and IsValidTarget(target) then
+                local Position = Vector(mh) + Vector(Vector(target) - Vector(mh)):normalized():perpendicular() * E.Range
+                local Position2 = Vector(mh) + Vector(Vector(target) - Vector(mh)):normalized():perpendicular2() * E.Range
+                    if not Collides(Position) then
+                        E:CastToVector(Position)
+                    elseif not Collides(Position2) then
+                        E:CastToVector(Position2)
+                    else
+                        E:CastToVector(Position)
                     end
-                end)
+                end
+            end)
 
-    Menu:addSubMenu(cha.." - Misc Settings", "Misc")
-        Menu.Misc:addParam("SetSkin", "Select Skin", SCRIPT_PARAM_LIST, 14, {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"})
+    Menu:addParam("SetSkin", cha.." - Skin Changer", SCRIPT_PARAM_LIST, 1, {"Classic", "Nottingham", "Striker", "Frosted", "Explorer", "Pulsefire", "TPA", "Debonair", "Ace of Spades", "Arcade", "C Debonair: Brown", "C Debonair: White", "C Debonair: Orange", "C Debonair: Black", "C Debonair: Blue", "C Debonair: Red", "C Debonair: Pink", "C Debonair: Purple"})
 
-    Menu:addSubMenu(cha.." - Keys Settings", "Keys")
+    Menu:addSubMenu(cha.." - Multiple Keys", "Keys")
         OrbwalkManager:LoadCommonKeys(Menu.Keys)
         Menu.Keys:addParam("HarassToggle", "Harass (Toggle)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
         OrbwalkManager:AddKey({Name = "AssistedUltimate", Text = "Assisted Ultimate (Near Mouse)", Key = string.byte("T"), Mode = ORBWALK_MODE.COMBO})
@@ -121,10 +112,20 @@ function OnLoad() BaseUlt()
         Menu.Keys.AssistedUltimate = false
         Menu.Keys.Flee = false
 
-    Menu:addSubMenu(cha.." - BaseUlt Settings", "BaseUlt")
+    Menu:addSubMenu(cha.." - BaseUlt", "BaseUlt")
         Menu.BaseUlt:addParam("BaseUlt", "Enable base ult", 1, true)
         Menu.BaseUlt:addParam("BaseUltDraw", "Draw base ult", 1, true)
         Menu.BaseUlt:addParam("Verbose", "Track enemy recall in chat", 1, true)
+end
+
+function SimpleLibUpdater()
+local r = _Required()
+    r:Add({Name = "SimpleLib", Url = "raw.githubusercontent.com/jachicao/BoL/master/SimpleLib.lua"})
+    r:Check()
+    if OrbwalkManager.GotReset then return end
+    if r:IsDownloading() then return end
+    if OrbwalkManager == nil then print("Check your SimpleLib file, isn't working... The script can't load without SimpleLib. Try to copy-paste the entire SimpleLib.lua on your common folder.") return end
+    DelayAction(function() _arrangePriorities() end, 10)
 end
 
 --[[ Script Start ]]
@@ -132,7 +133,7 @@ function OnTick()
     if Menu == nil then return end
     TS:update()
     KillSteal()
-    SetSkin(mh, Menu.Misc.SetSkin)
+    SetSkin(mh, Menu.SetSkin)
     RState = mh:CanUseSpell(_R) == READY
     if OrbwalkManager:IsCombo() then
         Combo()
@@ -143,14 +144,18 @@ function OnTick()
     elseif OrbwalkManager:IsLastHit() then
         LastHit()
     end
+
     if Menu.Keys.HarassToggle then Harass() end
     if Menu.Keys.Flee then Correr() end
+
     if Menu.Keys.AssistedUltimate then
         local BestEnemy = nil
         for idx, enemy in ipairs(GetEnemyHeroes()) do
             if R:ValidTarget(enemy) then
                 if BestEnemy == nil then BestEnemy = enemy
-                elseif GetDistanceSqr(mousePos, BestEnemy) > GetDistanceSqr(mousePos, enemy) then BestEnemy = enemy end
+                elseif GetDistanceSqr(mousePos, BestEnemy) > GetDistanceSqr(mousePos, enemy) then
+                    BestEnemy = enemy
+                end
             end
         end
         if R:ValidTarget(BestEnemy) then
@@ -159,36 +164,66 @@ function OnTick()
     end
 end
 
---[[ Auto Lantern ]]
-class "ThreshLantern"
-function ThreshLantern:__init()
-    self.lantern = nil
-    AddTickCallback(function() self:OnTick() end)
-    AddCreateObjCallback(function(a) self:OnCreateObj(a) end)
-    AddDeleteObjCallback(function(a) self:OnDeleteObj(a) end)
-end
-function ThreshLantern:OnTick()
-    if self.lantern ~= nil and LulzMenu.Hotkeys.FleeKey then
-        if GetDistanceSqr(self.lantern) < 90000 then
-            self.lantern:Interact()
+--[[ Script Code ]]
+function Combo() UseItems(target)
+local target = TS.target
+local q, w, e, r, dmg = GetBestCombo(target)
+    if ValidTarget(target) then
+        if Menu.Combo.useQ then
+            Q:Cast(target)
+        end
+        if Menu.Combo.useW and CheckMana(Menu.Combo.ManaW) then
+            W:Cast(target)
+        end
+        if Menu.Combo.useE then
+            CastSpell(_E, mousePos.x, mousePos.z)
+        end
+        if Menu.Combo.useR and target.health < R:Damage(target) + Q:Damage(target) + W:Damage(target) then
+            R:Cast(target)
+        end
+        if Menu.Combo.useR2 > 0 then
+            if R:IsReady() then
+                for i, enemy in ipairs(GetEnemyHeroes()) do
+                    local CastPosition, WillHit, NumberOfHits = R:GetPrediction(enemy, {TypeOfPrediction = "VPrediction"})
+                    if NumberOfHits and type(NumberOfHits) == "number" and NumberOfHits >= Menu.Combo.useR2 and WillHit then
+                        CastSpell(R.Slot, CastPosition.x, CastPosition.z)
+                    end
+                end
+            end
+        end
+        if Menu.Combo.Zhonyas > 0 and PercentageHealth() <= Menu.Combo.Zhonyas and DefensiveItems.Zhonyas:IsReady() and CountEnemyHeroInRange(600) >= 1 then
+            DefensiveItems.Zhonyas:Cast()
         end
     end
 end
-function ThreshLantern:OnCreateObj(obj)
-    if obj.name == "ThreshLantern" then
-        self.lantern = obj
+
+function Harass()
+local target = TS.target
+    if ValidTarget(target) then
+        if Menu.Harass.useQ and CheckMana(Menu.Harass.ManaQ) then
+            Q:Cast(target)
+        end
+        if Menu.Harass.useW and CheckMana(Menu.Harass.ManaW) then
+            W:Cast(target)
+        end
     end
-end
-function ThreshLantern:OnDeleteObj(obj)
-    if obj.name == "ThreshLantern" then
-        self.lantern = nil
-    end
-end
-function Collides(vec)
-    return IsWall(D3DXVECTOR3(vec.x, vec.y, vec.z))
 end
 
---[[ Script Code ]]
+function LastHit()
+    if CheckMana(Menu.LastHit.Mana)then
+        Q:LastHit({Mode = Menu.LastHit.Q})
+    end
+end
+
+function Clear()
+    if Menu.LaneClear.useQ and CheckMana(Menu.LaneClear.Mana) then
+        Q:LaneClear()
+    end
+    if Menu.JungleClear.useQ and CheckMana(Menu.JungleClear.Mana) then
+        Q:JungleClear()
+    end
+end
+
 function KillSteal()
     for idx, enemy in ipairs(GetEnemyHeroes()) do
         local ok = enemy.health/enemy.maxHealth <= 0.3
@@ -204,41 +239,8 @@ function KillSteal()
     end
 end
 
-function Combo()
-    local target = TS.target
-    local q, w, e, r, dmg = GetBestCombo(target)
-    if ValidTarget(target) then
-        if Menu.Combo.Zhonyas > 0 and PercentageHealth() <= Menu.Combo.Zhonyas and DefensiveItems.Zhonyas:IsReady() and CountEnemyHeroInRange(600) >= 1 then
-            DefensiveItems.Zhonyas:Cast()
-        end
-        if Menu.Combo.useE then
-            CastSpell(_E, mousePos.x, mousePos.z)
-        end
-        if Menu.Combo.useQ then
-            Q:Cast(target)
-        end
-        if Menu.Combo.useW then
-            W:Cast(target)
-        end
-        if Menu.Combo.useR and target.health < R:Damage(target) + Q:Damage(target) + W:Damage(target) then
-            R:Cast(target)
-        end
-        if Menu.Combo.useR2 > 0 then
-            if R:IsReady() then
-                for i, enemy in ipairs(GetEnemyHeroes()) do
-                    local CastPosition, WillHit, NumberOfHits = R:GetPrediction(enemy, {TypeOfPrediction = "VPrediction"})
-                    if NumberOfHits and type(NumberOfHits) == "number" and NumberOfHits >= Menu.Combo.useR2 and WillHit then
-                        CastSpell(R.Slot, CastPosition.x, CastPosition.z)
-                    end
-                end
-            end
-        end
-        UseItems(target)
-    end
-end
-
 function Correr()
-    local target = TS.target
+local target = TS.target
     if Menu.Keys.Flee then
         mh:MoveTo(mousePos.x, mousePos.z)
     end
@@ -247,53 +249,45 @@ function Correr()
     end
 end
 
-function Harass()
-    local target = TS.target
-    local kek = mh.mana / mh.maxMana * 100 >= Menu.Harass.Mana
-    if kek then
-        if ValidTarget(target) then
-            if Menu.Harass.useQ then
-                Q:Cast(target)
-            end
-            if Menu.Harass.useW then
-                W:Cast(target)
-            end
-        end
-    end
-end
-
-function Clear()
-    local kek = mh.mana / mh.maxMana * 100 >= Menu.Harass.Mana
-    if kek then
-        if Menu.LaneClear.useQ then
-            Q:LaneClear()
-        end
-    end
-    if Menu.JungleClear.useQ then
-        Q:JungleClear()
-    end
-end
-
-function LastHit()
-    local kek = mh.mana/mh.maxMana * 100 >= Menu.LastHit.Mana
-    if kek then
-        Q:LastHit({Mode = Menu.LastHit.Q})
+function CheckMana(mana)
+    if not mana then mana = 100 end
+    if mh.mana / mh.maxMana > mana / 100 then
+        return true
+    else
+        return false
     end
 end
 
 function PercentageMana(u)
-    local unit = u ~= nil and u or mh
+local unit = u ~= nil and u or mh
     return unit and unit.mana/unit.maxMana * 100 or 0
 end
 
 function PercentageHealth(u)
-    local unit = u ~= nil and u or mh
+local unit = u ~= nil and u or mh
     return unit and unit.health/unit.maxHealth * 100 or 0
 end
 
+function Cast_Item(item, target)
+    if item.IsReady() and ValidTarget(target, item.Range) then
+        if item.reqTarget then
+            CastSpell(item.Slot(), target)
+        else
+            CastSpell(item.Slot())
+        end
+    end
+end
+
+function UseItems(unit)
+    if ValidTarget(unit) then
+        for _, item in pairs(CastableItems) do
+            Cast_Item(item, unit)
+        end
+    end
+end
 
 function GetOverkill()
-    local over = (100 + Menu.Combo.Overkill)/100
+local over = (100 + Menu.Combo.Overkill)/100
     return over
 end
 
@@ -401,22 +395,33 @@ function GetComboDamage(target, q, w, e, r)
     return comboDamage, currentManaWasted
 end
 
-function Cast_Item(item, target)
-    if item.IsReady() and ValidTarget(target, item.Range) then
-        if item.reqTarget then
-            CastSpell(item.Slot(), target)
-        else
-            CastSpell(item.Slot())
+--[[ Auto Lantern ]]
+class "ThreshLantern"
+function ThreshLantern:__init()
+    self.lantern = nil
+    AddTickCallback(function() self:OnTick() end)
+    AddCreateObjCallback(function(a) self:OnCreateObj(a) end)
+    AddDeleteObjCallback(function(a) self:OnDeleteObj(a) end)
+end
+function ThreshLantern:OnTick()
+    if self.lantern ~= nil and LulzMenu.Hotkeys.FleeKey then
+        if GetDistanceSqr(self.lantern) < 90000 then
+            self.lantern:Interact()
         end
     end
 end
-
-function UseItems(unit)
-    if ValidTarget(unit) then
-        for _, item in pairs(CastableItems) do
-            Cast_Item(item, unit)
-        end
+function ThreshLantern:OnCreateObj(obj)
+    if obj.name == "ThreshLantern" then
+        self.lantern = obj
     end
+end
+function ThreshLantern:OnDeleteObj(obj)
+    if obj.name == "ThreshLantern" then
+        self.lantern = nil
+    end
+end
+function Collides(vec)
+    return IsWall(D3DXVECTOR3(vec.x, vec.y, vec.z))
 end
 
 --[[ Script Base Ult ]]
@@ -757,22 +762,22 @@ function _Downloader:Base64Encode(data)
 end
 
 --[[ Script Autodownloader ]]
-	function Update()
-		if AUTOUPDATE then
-			local ServerData = GetWebResult(UPDATE_HOST, "/vankatze/vktz/blob/master/The-nabo.version")
-				if ServerData then
-					ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
-						if ServerVersion then
-							if tonumber(versionn) < ServerVersion then
-								DelayAction(function() print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">New version found for The Nabo... <font color=\"#000000\"> | </font><font color=\"#FF0000\"></font><font color=\"#FF0000\"><b> Version "..ServerVersion.."</b></font>") end, 3)
-								DelayAction(function() print("<font color=\"#FFFFFF\"><b> >> Updating, please don't press F9 << </b></font>") end, 4)
-								DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The Nabo</font> <font color=\"#000000\"> | </font><font color=\"#FF0000\">UPDATED <font color=\"#FF0000\"><b>("..versionn.." => "..ServerVersion..")</b></font> Press F9 twice to load the updated version.") end) end, 5)
-							else
-								DelayAction(function() print("<b><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FFFFFF\">The Nabo</font><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0000\"> Version "..ServerVersion.."</b></font>") end, 1)
-								end
-						end
-					else
-				DelayAction(function() print("<font color=\"#FFFFFF\">The Nabo - Error while downloading version info, RE-DOWNLOAD MANUALLY.</font>")end, 1)
+function Update()
+	if AUTOUPDATE then
+	local ServerData = GetWebResult(UPDATE_HOST, "/vankatze/vktz/master/The-nabo.version")
+		if ServerData then
+			ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+			if ServerVersion then
+				if tonumber(version) < ServerVersion then
+					DelayAction(function() print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0077\">EzzY - The truly Nabo - New version found... <font color=\"#000000\"> | </font><font color=\"#FF0000\"></font><font color=\"#FF0000\"><b> Version "..ServerVersion.."</b></font>") end, 3)
+					DelayAction(function() print("<font color=\"#FFFFFF\"><b> >> Updating, please don't press F9 << </b></font>") end, 4)
+					DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0077\">EzzY - The truly Nabo</font> <font color=\"#000000\"> | </font><font color=\"#FF0000\">UPDATED <font color=\"#FF0000\"><b>("..version.." => "..ServerVersion..")</b></font> Press F9 twice to load the updated version.") end) end, 5)
+				else
+					DelayAction(function() print("<b><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0077\">EzzY - The truly Nabo</font><font color=\"#000000\"> | </font><font color=\"#FF0000\"><font color=\"#FF0000\"> Version "..ServerVersion.."</b></font>") end, 1)
+				end
 			end
+		else
+		  DelayAction(function() print("<font color=\"#FF0077\">EzzY - The truly Nabo </font><font color=\"#FFFFFF\"> - Error while downloading version info, RE-DOWNLOAD MANUALLY.</font>")end, 1)
 		end
 	end
+end
